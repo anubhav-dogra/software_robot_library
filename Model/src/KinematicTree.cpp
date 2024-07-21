@@ -21,15 +21,23 @@ KinematicTree::KinematicTree(const std::string &pathToURDF)
      map<string, unsigned int> linkList;                                                            // Search for links by name
      map<string, RigidBody>    rigidBodyList;                                                       // Store urdf links / RigidBody objects
      
-     // Check to see if the file exists
-     if(not ifstream(pathToURDF.c_str()))
+     // check to see if pathToURDF is not empty
+     if(pathToURDF.empty())
      {
           throw runtime_error("[ERROR] [KINEMATIC TREE] Constructor: "
-                              "The file " + pathToURDF + " does not appear to exist.");
+                              "The URDF was empty.");
      }
 
-     XMLDocument urdf; urdf.LoadFile(pathToURDF.c_str());                                           // Load URDF           
-     
+     // Check to see if the file exists
+     // if(not ifstream(pathToURDF.c_str()))
+     // {
+     //      throw runtime_error("[ERROR] [KINEMATIC TREE] Constructor: "
+     //                          "The file " + pathToURDF + " does not appear to exist.");
+     // }
+
+     XMLDocument urdf;
+     // urdf.LoadFile(pathToURDF.c_str()); 
+     urdf.Parse(pathToURDF.c_str());                                          // Load URDF           
      // Make sure a robot is defined
      XMLElement* robot = urdf.FirstChildElement("robot");
      
@@ -70,12 +78,12 @@ KinematicTree::KinematicTree(const std::string &pathToURDF)
                                   ixz, iyz, izz;
                
                XMLElement* origin = inertial->FirstChildElement("origin");
-               
+
                if(origin != nullptr)
                {
                     Eigen::Vector3d xyz = char_to_vector(origin->Attribute("xyz"));
                     Eigen::Vector3d rpy = char_to_vector(origin->Attribute("rpy"));
-                    
+
                     // NOTE: URDF specifies a pose for the center of mass,
                     //       which is a little superfluous, so we will reduce it
                     
